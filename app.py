@@ -200,11 +200,11 @@ def get_stock_prediction(stock_name, selected_date):
             historical_data = historical_data.tail(100)
             last_100_days = historical_data['Close'].values.reshape(-1, 1)
             predicted_past_price = generate_future_predictions(model, scaler, last_100_days, 1)[0]
-            return predicted_past_price * multiplying_factors[stock_name]
+            return predicted_past_price * multiplying_factors[stock_name], "Prediction"
         else:
             # Show actual historical price
             historical_price = historical_data.loc[historical_data['Date'] == pd.to_datetime(selected_date), 'Close']
-            return historical_price.values[0]
+            return historical_price.values[0], "Actual"
 
     elif selected_date == today:
         # Handle today's date
