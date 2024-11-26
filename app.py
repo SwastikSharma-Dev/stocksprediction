@@ -72,9 +72,9 @@ st.set_page_config(page_title="Stock Predictor", page_icon="📈", layout="wide"
 # Advanced CSS for Cleaner Design
 st.markdown("""
     <style>
-        /* Enhanced Full-screen layout */
+        /* Enhanced Full-screen layout with a contrasting blue palette */
         .stApp {
-            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            background: linear-gradient(135deg, #1e3a5f, #4a6f92);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -87,7 +87,7 @@ st.markdown("""
         .main-heading {
             font-size: 3.5rem;
             font-weight: 900;
-            color: white;
+            color: #ffffff;
             text-align: center;
             margin-bottom: 40px;
             text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
@@ -96,19 +96,7 @@ st.markdown("""
 
         /* Prediction Container */
         .prediction-container {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.125);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
-            padding: 40px;
-            text-align: center;
-            width: 80%;
-            max-width: 700px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            margin-top: 40px;
         }
 
         /* Large Prediction Value */
@@ -129,31 +117,43 @@ st.markdown("""
             text-align: center;
         }
 
-        /* Responsive Sidebar */
-        .css-1aumxhk {
-            background: rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(10px);
-            border-radius: 10px;
-            padding: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.125);
+        /* Centered layout */
+        .centered-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
         }
 
         /* Buttons and Inputs */
         .stButton>button {
-            background-color: rgba(0, 255, 255, 0.2);
+            background-color: #00aaff;
             color: white;
-            border: 1px solid rgba(0, 255, 255, 0.5);
+            border: 1px solid #0077cc;
+            padding: 10px 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 8px;
             transition: all 0.3s ease;
         }
 
         .stButton>button:hover {
-            background-color: rgba(0, 255, 255, 0.4);
+            background-color: #0099cc;
             transform: scale(1.05);
         }
 
         .stSelectbox, .stDateInput {
             background-color: rgba(255, 255, 255, 0.1);
             color: white;
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #006699;
+        }
+
+        .stSelectbox>div, .stDateInput>div {
+            background-color: rgba(255, 255, 255, 0.1);
         }
 
         /* Ensure centered content */
@@ -170,11 +170,14 @@ st.markdown("""
 # Main Page Heading
 st.markdown('<div class="main-heading">Stock Price Prediction</div>', unsafe_allow_html=True)
 
-# Sidebar
-st.sidebar.header("🔍 Stock Prediction")
-stock_options = ["GOOGL", "AAPL", "MSFT", "META", "AMZN", "NFLX", "NVDA"]
-stock_name = st.sidebar.selectbox("Choose a Stock", stock_options)
-selected_date = st.sidebar.date_input("Select Prediction Date", min_value=datetime(2004, 1, 1))
+# Centered selection and prediction button
+with st.container():
+    st.markdown('<div class="centered-container">', unsafe_allow_html=True)
+    stock_options = ["GOOGL", "AAPL", "MSFT", "META", "AMZN", "NFLX", "NVDA"]
+    stock_name = st.selectbox("Choose a Stock", stock_options)
+    selected_date = st.date_input("Select Prediction Date", min_value=datetime(2004, 1, 1))
+    prediction_button = st.button("Get Prediction")
+    st.markdown('</div>', unsafe_allow_html=True)
 
 # Main Prediction Logic
 def get_stock_prediction(stock_name, selected_date):
@@ -210,10 +213,10 @@ def get_stock_prediction(stock_name, selected_date):
             historical_data = historical_data.tail(100)
             last_100_days = historical_data['Close'].values.reshape(-1, 1)
             predicted_today_price = generate_future_predictions(model, scaler, last_100_days, 1)[0]
-            return predicted_today_price * multiplying_factors[stock_name]
+            return predicted_today_price * multiplying_factors[stock_name], "Prediction"
         else:
             # Show today's actual price (market closed)
-            return historical_data.iloc[-1]['Close']
+            return historical_data.iloc[-1]['Close'], "Actual"
 
     else:
         # Predict for future dates
@@ -221,13 +224,14 @@ def get_stock_prediction(stock_name, selected_date):
         historical_data = historical_data.tail(100)
         last_100_days = historical_data['Close'].values.reshape(-1, 1)
         future_predictions = generate_future_predictions(model, scaler, last_100_days, num_days)
-        return future_predictions[-1] * multiplying_factors[stock_name]
+        return future_predictions[-1] * multiplying_factors[stock_name], "Prediction"
 
-# Display Prediction
-prediction = get_stock_prediction(stock_name, selected_date)
+# Display Prediction when button is clicked
+if prediction_button:
+    prediction, pred_type = get_stock_prediction(stock_name, selected_date)
 
-if prediction is not None:
-    st.markdown('<div class="prediction-container">', unsafe_allow_html=True)
-    st.markdown(f'<div class="prediction-value">${prediction:.2f}</div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="prediction-text">Predicted Price for {stock_name} on {selected_date}</div>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+    if prediction is not None:
+        st.markdown('<div class="prediction-container">', unsafe_allow_html=True)
+        st.markdown(f'<div class="prediction-value">${prediction:.2f}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="prediction-text">{pred_type} Price for {stock_name} on {selected_date}</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
