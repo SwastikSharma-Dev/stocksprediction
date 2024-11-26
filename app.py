@@ -169,7 +169,7 @@ st.markdown("""
 
 # Main Page Heading
 st.markdown('<div class="main-heading">Stock Price Prediction</div>', unsafe_allow_html=True)
-
+st.markdown('<div>Disclaimer: This is just a ML based Prediction Model which do not Claim any Prediction to be True. Best performs for 1 Month Near Future as Stock Market is highly impacted by News and is a Sensitive Dataset.</div>', unsafe_allow_html=True)
 # Centered selection and prediction button
 with st.container():
     st.markdown('<div class="centered-container">', unsafe_allow_html=True)
